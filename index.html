@@ -173,7 +173,26 @@ header { background: var(--surface); border-bottom: 1px solid var(--border); pad
     <div class="cart-info" id="cart-info">Nenhum item selecionado</div>
     <div class="cart-total" id="cart-total"></div>
   </div>
-  <button class="cart-btn" id="cart-btn" disabled onclick="abrirCheckout()">🛒 FINALIZAR COMPRA</button>
+  <button class="cart-btn" id="cart-btn" disabled onclick="abrirCarrinho()">🛒 FINALIZAR COMPRA</button>
+</div>
+
+<!-- Cart review overlay -->
+<div class="modal-overlay" id="cart-review">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">Seu Carrinho</div>
+      <button class="modal-close" onclick="fecharCarrinho()">✕</button>
+    </div>
+    <div id="cart-review-body" style="padding:0 16px 8px"></div>
+    <div style="padding:12px 16px;border-top:1px solid var(--border)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span style="font-size:13px;color:var(--text-muted)">Total</span>
+        <span id="cart-review-total" style="font-size:20px;font-weight:700;color:var(--amber);font-family:'Bebas Neue',sans-serif;letter-spacing:1px"></span>
+      </div>
+      <button onclick="fecharCarrinho()" style="width:100%;padding:11px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer;margin-bottom:8px">← Continuar comprando</button>
+      <button onclick="fecharCarrinho();abrirCheckout()" style="width:100%;padding:11px;background:var(--amber);color:#111;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Bebas Neue',sans-serif;letter-spacing:1px">FINALIZAR COMPRA</button>
+    </div>
+  </div>
 </div>
 
 <!-- Checkout modal -->
@@ -524,7 +543,7 @@ function msbAdicionarAoCarrinho() {
     const key = 'msb_' + Date.now() + '_' + Math.random();
     const instances = [];
     for (let i = 0; i < b.qty; i++) {
-      instances.push({ combo: b.combo, drink: b.drink, ponto: b.isVeg ? 'N/A' : '', veg: b.isVeg, obs: '', bebidaAvulsa: '', bebidaAvulsaPreco: 0, detalhes: b.detalhes });
+      instances.push({ combo: b.combo, drink: b.drink, ponto: b.ponto || (b.isVeg ? 'N/A' : ''), veg: b.isVeg, obs: '', bebidaAvulsa: '', bebidaAvulsaPreco: 0, detalhes: b.detalhes });
     }
     cart[key] = { name: 'Monte seu Burger', price: b.preco, instances, isMSB: true, detalhes: b.detalhes, isVeg: b.isVeg };
   });
@@ -768,14 +787,10 @@ function confirmItemModal() {
       errEl.textContent = 'Escolha a bebida do combo.'; errEl.classList.add('show'); return;
     }
     errEl.classList.remove('show');
-    const key = 'msb_' + Date.now();
-    const instances = [];
-    for (let q = 0; q < msbQty; q++) {
-      instances.push({ combo: modalCombo, drink: modalDrink, ponto: isVeg ? 'N/A' : modalPonto, veg: isVeg, obs: modalObs, bebidaAvulsa: '', bebidaAvulsaPreco: 0, detalhes });
-    }
-    cart[key] = { name: 'Monte seu Burger', price: preco, instances, isMSB: true, detalhes, isVeg };
+    msbBurgers.push({ detalhes, preco, qty: msbQty, combo: modalCombo, drink: modalDrink, isVeg, ponto: isVeg ? 'N/A' : modalPonto });
     document.getElementById('item-modal').classList.remove('open');
-    modalMSBData = null; msbReset(); msbQty = 1; updateCart(); msbRenderSuccess();
+    modalMSBData = null; msbReset(); msbQty = 1;
+    msbRenderPage(false);
     return;
   }
 
@@ -846,6 +861,69 @@ function updateCart() {
   document.getElementById('cart-info').textContent = count === 0 ? 'Nenhum item selecionado' : count + ' item' + (count > 1 ? 's' : '') + ' no pedido';
   document.getElementById('cart-total').textContent = count === 0 ? '' : 'R$ ' + total.toFixed(2).replace('.',',');
   document.getElementById('cart-btn').disabled = count === 0;
+}
+
+// ─── CARRINHO (revisão) ────────────────────────────────────────────────
+function abrirCarrinho() {
+  const entries = Object.entries(cart).filter(([,e]) => e.instances.length > 0);
+  if (entries.length === 0) return;
+
+  let total = 0;
+  let html = '';
+  entries.forEach(([key, entry]) => {
+    const count = entry.instances.length;
+    const lineTotal = entry.instances.reduce((s, inst) => s + entry.price + (inst.combo ? 10.90 : 0), 0);
+    total += lineTotal;
+    const obs = entry.instances.map(inst => {
+      const parts = [];
+      if (inst.ponto && inst.ponto !== 'N/A') parts.push(inst.ponto);
+      if (inst.combo) parts.push('Combo' + (inst.drink ? ' (' + inst.drink + ')' : ''));
+      if (inst.obs) parts.push(inst.obs);
+      return parts.join(' · ');
+    }).filter(Boolean);
+    html += '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)">' +
+      '<div style="flex:1">' +
+      '<div style="font-size:13px;font-weight:500;color:var(--text)">' + count + 'x ' + entry.name + '</div>' +
+      (obs.length ? '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + obs.join(' / ') + '</div>' : '') +
+      '</div>' +
+      '<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">' +
+      '<button onclick="cartReviewQty(\'' + key + '\',-1)" style="width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:15px;color:var(--text)">−</button>' +
+      '<span style="font-size:13px;font-weight:500;min-width:14px;text-align:center">' + count + '</span>' +
+      '<button onclick="cartReviewQty(\'' + key + '\',1)" style="width:26px;height:26px;border-radius:5px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:15px;color:var(--text)">+</button>' +
+      '<button onclick="cartReviewRemover(\'' + key + '\')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:0 2px">✕</button>' +
+      '<span style="font-size:13px;font-weight:600;color:var(--amber);min-width:60px;text-align:right">R$ ' + lineTotal.toFixed(2).replace('.',',') + '</span>' +
+      '</div></div>';
+  });
+
+  document.getElementById('cart-review-body').innerHTML = html;
+  document.getElementById('cart-review-total').textContent = 'R$ ' + total.toFixed(2).replace('.',',');
+  document.getElementById('cart-review').classList.add('open');
+}
+
+function fecharCarrinho() {
+  document.getElementById('cart-review').classList.remove('open');
+}
+
+function cartReviewRemover(key) {
+  delete cart[key];
+  updateCart();
+  const remaining = Object.values(cart).filter(e => e.instances.length > 0);
+  if (remaining.length === 0) { fecharCarrinho(); return; }
+  abrirCarrinho();
+}
+
+function cartReviewQty(key, delta) {
+  const entry = cart[key];
+  if (!entry) return;
+  if (delta > 0) {
+    const last = entry.instances[entry.instances.length - 1];
+    entry.instances.push({ ...last });
+  } else {
+    if (entry.instances.length <= 1) { cartReviewRemover(key); return; }
+    entry.instances.pop();
+  }
+  updateCart();
+  abrirCarrinho();
 }
 
 // ─── CHECKOUT ─────────────────────────────────────────────────────────
