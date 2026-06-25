@@ -1,0 +1,993 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hold'em Sports Bar — Cardápio Delivery</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600&family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --amber: #F5C842;
+  --amber-dark: #c9a030;
+  --bg: #0d0d0d;
+  --surface: #161616;
+  --surface2: #202020;
+  --border: #2a2a2a;
+  --border-amber: rgba(245,200,66,0.3);
+  --text: #f0f0f0;
+  --text-muted: #777;
+  --radius: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 16px 12px; text-align: center; position: sticky; top: 0; z-index: 100; }
+.header-corners { position: relative; display: inline-block; padding: 0 24px; }
+.header-corners::before, .header-corners::after { content: ''; position: absolute; width: 12px; height: 12px; border-color: var(--amber); border-style: solid; opacity: 0.5; }
+.header-corners::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
+.header-corners::after { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+.logo-script { font-family: 'Dancing Script', cursive; font-weight: 700; font-size: 40px; color: #fff; line-height: 1.1; }
+.logo-divider { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 2px 0; }
+.logo-divider-line { width: 32px; height: 1px; background: var(--amber); opacity: 0.5; }
+.logo-divider-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); }
+.logo-sub { font-family: 'Bebas Neue', sans-serif; font-size: 11px; color: var(--amber); letter-spacing: 6px; opacity: 0.8; }
+
+.cats-wrap { overflow-x: auto; padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); scrollbar-width: none; }
+.cats-wrap::-webkit-scrollbar { display: none; }
+.cats { display: flex; gap: 8px; width: max-content; }
+.cat-btn { padding: 6px 16px; border-radius: 4px; border: 1px solid var(--border); font-size: 12px; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; cursor: pointer; background: var(--surface2); color: var(--text-muted); white-space: nowrap; transition: all 0.15s; }
+.cat-btn.active { background: var(--amber); color: #111; border-color: var(--amber); }
+.cat-btn:hover:not(.active) { border-color: var(--border-amber); color: var(--amber); }
+
+.items { padding: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)); gap: 10px; padding-bottom: 110px; }
+
+.item-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; display: flex; flex-direction: column; transition: border-color 0.15s; position: relative; }
+.item-card:hover { border-color: var(--border-amber); }
+.item-card.active-card { border-color: var(--amber); }
+.item-card.active-card::before, .item-card.active-card::after { content: ''; position: absolute; width: 8px; height: 8px; border-color: var(--amber); border-style: solid; z-index: 2; }
+.item-card.active-card::before { top: 4px; left: 4px; border-width: 1.5px 0 0 1.5px; }
+.item-card.active-card::after { bottom: 4px; right: 4px; border-width: 0 1.5px 1.5px 0; }
+.emoji-placeholder { font-size: 34px; width: 100%; aspect-ratio: 4/3; display: flex; align-items: center; justify-content: center; background: var(--surface2); }
+.item-body { padding: 10px 11px 11px; flex: 1; display: flex; flex-direction: column; }
+.item-name { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 3px; line-height: 1.3; }
+.item-desc { font-size: 11px; color: var(--text-muted); line-height: 1.5; flex: 1; margin-bottom: 8px; }
+.item-footer { display: flex; align-items: center; justify-content: space-between; }
+.item-price { font-family: 'Bebas Neue', sans-serif; font-size: 17px; color: var(--amber); }
+.qty-control { display: flex; align-items: center; gap: 5px; }
+.qty-btn { width: 26px; height: 26px; border-radius: 3px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; color: var(--amber); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: all 0.1s; }
+.qty-btn:hover { background: var(--amber); color: #111; border-color: var(--amber); }
+.qty-num { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--text); min-width: 14px; text-align: center; }
+
+.veg-toggle { margin-top: 7px; display: flex; align-items: center; gap: 6px; cursor: pointer; user-select: none; }
+.veg-toggle input[type="checkbox"] { display: none; }
+.veg-check { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid #3a3; background: var(--surface); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.veg-check svg { display: none; }
+.veg-toggle input:checked ~ .veg-check { background: #2a7a2a; border-color: #3a3; }
+.veg-toggle input:checked ~ .veg-check svg { display: block; }
+.veg-label { font-size: 10px; color: #5a5; }
+
+.combo-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+.combo-toggle input[type="checkbox"] { display: none; }
+.combo-check-box { width: 16px; height: 16px; border-radius: 3px; border: 1.5px solid var(--border); background: var(--surface); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.combo-check-box svg { display: none; }
+.combo-toggle input:checked ~ .combo-check-box { background: var(--amber); border-color: var(--amber); }
+.combo-toggle input:checked ~ .combo-check-box svg { display: block; }
+.combo-label { font-size: 11px; color: var(--text-muted); line-height: 1.3; flex: 1; }
+.combo-label strong { color: var(--amber); }
+.combo-label span { display: block; font-size: 10px; margin-top: 1px; }
+.combo-drink-select { margin-top: 7px; width: 100%; background: var(--surface); border: 1px solid var(--amber); border-radius: 6px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 11px; padding: 6px 28px 6px 9px; outline: none; cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23F5C842' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center; }
+
+.ponto-mini-btns { display: flex; gap: 4px; }
+.ponto-mini-btn { flex: 1; padding: 5px 3px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: 10px; cursor: pointer; transition: all 0.1s; text-align: center; }
+.ponto-mini-btn.active { background: var(--amber); color: #111; border-color: var(--amber); font-weight: 600; }
+
+.msb-card { background: var(--surface); border: 1px solid var(--border-amber); border-radius: var(--radius); padding: 14px; margin: 14px; margin-bottom: 0; }
+.msb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.msb-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--amber); letter-spacing: 1px; }
+.msb-price { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--amber); }
+.msb-section { margin-bottom: 12px; }
+.msb-sec-title { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.msb-opts { display: flex; flex-wrap: wrap; gap: 6px; }
+.msb-opt { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); font-size: 11px; cursor: pointer; transition: all 0.12s; white-space: nowrap; }
+.msb-opt.active { background: var(--amber); color: #111; border-color: var(--amber); font-weight: 600; }
+.msb-opt.extra-opt { border-color: var(--border-amber); }
+.msb-opt.extra-opt.active { background: var(--amber); color: #111; }
+.msb-opt-price { font-size: 9px; margin-left: 3px; opacity: 0.7; }
+.msb-add-btn { width: 100%; margin-top: 12px; padding: 10px; background: var(--amber); color: #111; border: none; border-radius: 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px; cursor: pointer; transition: background 0.15s; }
+.msb-add-btn:hover { background: var(--amber-dark); }
+.msb-total { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--amber); text-align: right; margin-top: 8px; }
+
+.cart-bar { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border-amber); padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; z-index: 200; }
+.cart-info { font-size: 12px; color: var(--text-muted); }
+.cart-total { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--amber); letter-spacing: 1px; margin-top: 1px; }
+.cart-btn { background: var(--amber); color: #111; border: none; border-radius: 6px; padding: 10px 18px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1px; transition: background 0.15s; white-space: nowrap; }
+.cart-btn:hover { background: var(--amber-dark); }
+.cart-btn:disabled { background: var(--surface2); color: var(--text-muted); cursor: default; }
+
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 300; overflow-y: auto; padding: 20px 16px 100px; }
+.modal-overlay.open { display: block; }
+.modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; max-width: 480px; margin: 0 auto; padding: 24px 20px; }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--amber); letter-spacing: 2px; }
+.modal-close { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 22px; padding: 0; line-height: 1; }
+.modal-close:hover { color: var(--text); }
+.section-title { font-size: 11px; font-weight: 600; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; margin-top: 20px; }
+.section-title:first-child { margin-top: 0; }
+.order-summary { background: var(--surface2); border-radius: 8px; padding: 12px 14px; margin-bottom: 4px; }
+.order-line { font-size: 13px; color: var(--text); padding: 4px 0; border-bottom: 1px solid var(--border); }
+.order-line:last-child { border-bottom: none; }
+.order-line.sub { font-size: 12px; color: var(--text-muted); padding-left: 12px; }
+.order-total { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--amber); margin-top: 10px; text-align: right; }
+.field-group { margin-bottom: 14px; }
+.field-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; display: block; }
+.field-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 14px; padding: 10px 12px; outline: none; transition: border-color 0.15s; }
+.field-input:focus { border-color: var(--amber); }
+.field-input::placeholder { color: var(--text-muted); }
+.toggle-group { display: flex; gap: 8px; }
+.toggle-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: center; }
+.toggle-btn.active { background: var(--amber); color: #111; border-color: var(--amber); font-weight: 600; }
+.pay-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.pay-btn { padding: 10px 6px; border-radius: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: center; }
+.pay-btn.active { background: var(--amber); color: #111; border-color: var(--amber); font-weight: 600; }
+.confirm-btn { width: 100%; background: var(--amber); color: #111; border: none; border-radius: 10px; padding: 14px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; margin-top: 24px; transition: background 0.15s; }
+.confirm-btn:hover { background: var(--amber-dark); }
+.confirm-btn:disabled { background: var(--surface2); color: var(--text-muted); cursor: default; }
+.error-msg { font-size: 12px; color: #e05a5a; margin-top: 6px; display: none; }
+.error-msg.show { display: block; }
+.taxa-badge { display: inline-block; background: var(--surface2); border: 1px solid var(--border-amber); border-radius: 6px; padding: 6px 10px; font-size: 12px; color: var(--amber); margin-top: 8px; }
+.sucesso-box { background: #0d2b1a; border: 1px solid #1a5c30; border-radius: 10px; padding: 20px; text-align: center; margin-top: 16px; }
+.sucesso-box h3 { color: #2ecc71; font-size: 18px; margin-bottom: 8px; }
+.sucesso-box p { color: var(--text-muted); font-size: 13px; line-height: 1.6; }
+.obs-input { width: 100%; margin-top: 7px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'Inter', sans-serif; font-size: 11px; padding: 6px 9px; outline: none; transition: border-color 0.15s; resize: none; }
+.obs-input:focus { border-color: var(--border-amber); }
+.obs-input::placeholder { color: var(--text-muted); }
+
+/* Item config modal */
+.item-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 400; overflow-y: auto; padding: 20px 16px 100px; }
+.item-modal-overlay.open { display: block; }
+.item-modal-box { background: var(--surface); border: 1px solid var(--border-amber); border-radius: 14px; max-width: 480px; margin: 0 auto; padding: 24px 20px; }
+.item-modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--amber); letter-spacing: 2px; margin-bottom: 4px; }
+.item-modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 18px; }
+.item-modal-confirm { width: 100%; padding: 13px; background: var(--amber); color: #111; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Bebas Neue', sans-serif; letter-spacing: 1.5px; margin-top: 20px; transition: background 0.15s; }
+.item-modal-confirm:hover { background: var(--amber-dark); }
+.item-modal-back { margin-top: 12px; width: 100%; text-align: center; font-size: 13px; color: var(--text-muted); background: none; border: none; cursor: pointer; }
+.modal-sec-title { font-size: 11px; font-weight: 600; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; margin-top: 16px; }
+.modal-sec-title:first-child { margin-top: 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-corners">
+    <div class="logo-script">Hold'em</div>
+    <div class="logo-divider"><div class="logo-divider-line"></div><div class="logo-divider-dot"></div><div class="logo-divider-line"></div></div>
+    <div class="logo-sub">Sports Bar &nbsp;·&nbsp; Cardápio Delivery</div>
+  </div>
+</header>
+
+<div class="cats-wrap"><div class="cats" id="cats"></div></div>
+<div id="content-area"><div class="items" id="items"></div></div>
+
+<div class="cart-bar">
+  <div>
+    <div class="cart-info" id="cart-info">Nenhum item selecionado</div>
+    <div class="cart-total" id="cart-total"></div>
+  </div>
+  <button class="cart-btn" id="cart-btn" disabled onclick="abrirCheckout()">🛒 FINALIZAR COMPRA</button>
+</div>
+
+<!-- Checkout modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Finalizar Pedido</div>
+      <button class="modal-close" onclick="fecharCheckout()">✕</button>
+    </div>
+    <div class="section-title">Resumo do Pedido</div>
+    <div class="order-summary" id="resumo-itens"></div>
+    <div class="section-title">Seu Nome</div>
+    <div class="field-group">
+      <input class="field-input" id="campo-nome" type="text" placeholder="Como devemos te chamar?" maxlength="60">
+      <div class="error-msg" id="err-nome">Por favor, informe seu nome.</div>
+    </div>
+    <div class="section-title">Seu WhatsApp</div>
+    <div class="field-group">
+      <input class="field-input" id="campo-tel" type="tel" placeholder="(16) 99999-0000" maxlength="20">
+      <div class="error-msg" id="err-tel">Informe seu WhatsApp para receber a confirmação.</div>
+    </div>
+    <div class="section-title">Tipo de Pedido</div>
+    <div class="toggle-group" style="margin-bottom:14px">
+      <button class="toggle-btn active" id="btn-entrega" onclick="setTipo('entrega')">🛵 Entrega</button>
+      <button class="toggle-btn" id="btn-retirada" onclick="setTipo('retirada')">🏪 Retirada no balcão</button>
+    </div>
+    <div id="bloco-entrega">
+      <div class="section-title">Endereço de Entrega</div>
+      <div class="field-group">
+        <label class="field-label">Rua e número</label>
+        <input class="field-input" id="campo-rua" type="text" placeholder="Ex: Rua das Flores, 123">
+        <div class="error-msg" id="err-rua">Informe a rua e número.</div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Bairro</label>
+        <input class="field-input" id="campo-bairro" type="text" placeholder="Ex: Centro" oninput="buscarTaxa()">
+        <div class="error-msg" id="err-bairro">Informe o bairro.</div>
+        <div id="taxa-info"></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Ponto de referência (opcional)</label>
+        <input class="field-input" id="campo-ref" type="text" placeholder="Ex: Próximo ao mercado">
+      </div>
+    </div>
+    <div class="section-title">Forma de Pagamento</div>
+    <div class="pay-group" style="margin-bottom:14px">
+      <button class="pay-btn" onclick="setPagamento(this,'Pix')">💸 Pix</button>
+      <button class="pay-btn" onclick="setPagamento(this,'Cartão')">💳 Cartão</button>
+      <button class="pay-btn" onclick="setPagamento(this,'Dinheiro')">💵 Dinheiro</button>
+    </div>
+    <div class="error-msg" id="err-pagamento">Selecione a forma de pagamento.</div>
+    <div id="bloco-troco" style="display:none" class="field-group">
+      <label class="field-label">Troco para quanto?</label>
+      <input class="field-input" id="campo-troco" type="text" placeholder="Ex: R$ 50,00">
+    </div>
+    <div id="total-final" style="margin-top:16px"></div>
+    <button class="confirm-btn" id="btn-confirmar" onclick="enviarPedido()">ENVIAR PEDIDO</button>
+    <div id="resultado-pedido"></div>
+  </div>
+</div>
+
+<!-- Per-unit item config modal -->
+<div class="item-modal-overlay" id="item-modal">
+  <div class="item-modal-box">
+    <div class="item-modal-title" id="item-modal-title">Personalizar</div>
+    <div class="item-modal-sub" id="item-modal-sub"></div>
+    <div id="item-modal-content"></div>
+    <div id="item-modal-error" class="error-msg" style="text-align:center;margin-top:12px"></div>
+    <button class="item-modal-confirm" id="item-modal-confirm-btn" onclick="confirmItemModal()">Adicionar ao carrinho</button>
+    <button class="item-modal-back" onclick="fecharItemModal()">← Voltar ao cardápio</button>
+  </div>
+</div>
+
+<script>
+const WHATSAPP = '5516994605273';
+const CRM_API_URL = 'https://holdem-crm.vercel.app/api/pedidos';
+const CRM_API_KEY = 'holdem-cardapio-secret-key';
+const COMBO_PRICE = 10.90;
+const COMBO_CATS = ['Hambúrgueres','Lanches'];
+const COMBO_DRINKS = ['Coca-Cola','Fanta','Sprite','Guaraná Antarctica','Água sem gás','Água com gás','H2OH','Schweppes','Suco','Soda Italiana','Energético Red Bull'];
+const CARNE_BOVINA_HAMBURGUERES = ['San Siro','Maracanã','Morumbi','Camp Nou','Bernabeu','Azteca','Monumental','El Madrigal'];
+const CARNE_BOVINA_LANCHES = ['Centenário','Beira-Rio','Noroeste','São Carlense','Ferroviária'];
+
+function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
+function similaridade(a, b) {
+  a = norm(a); b = norm(b);
+  if (a === b) return 1;
+  if (b.includes(a) || a.includes(b)) return 0.9;
+  let matches = 0;
+  const words = a.split(' ');
+  words.forEach(w => { if (b.includes(w) && w.length > 2) matches++; });
+  return matches / Math.max(words.length, 1);
+}
+
+const BAIRROS_TAXA = {
+  'centro':8,'vila pureza':8,'vila nery':8,'vila prado':8,'vila monteiro':8,
+  'jardim gibertoni':10,'lagoa serena':10,'santa felicia':10,'parque fehr':10,
+  'cidade jardim':10,'kartodromo':10,'parque faber i':10,'parque faber ii':10,
+  'parque santa monica':10,'gonzaga':10,'vila isabel':10,'cedrinho':10,
+  'castelo branco':10,'tijuco preto':10,'sao jose':10,'primavera':10,
+  'sabara':10,'vila redencao':10,'cruzeiro do sul':10,'jardim cruzeiro do sul':10,
+  'vila bela vista':10,'vila boa vista':10,'vila boa vista 2':10,'abdelnur':10,
+  'faga':10,'tangara':10,'jardim tangara':10,'jardim gonzaga':10,
+  'novo horizonte':11,'embare':11,'jockey club':11,'damha i':11,'damha ii':11,
+  'damha iii':11,'damha golf':11,'bosque sao carlos':11,'samambaia':11,
+  'ufscar':13,'parque industrial':11,'ceat':11,'village i':13,'village ii':13,
+  'village iii':13,'portal do vale':16,'tutoya do vale':16,'antenor garcia':16,
+  'cidade aracy':16,'cidade aracy 2':16,
+  'agua vermelha':'indisponivel','santa eudoxia':'indisponivel',
+  'ibate':'indisponivel','varjao':'indisponivel','parque itaipu':'indisponivel',
+  'arace de santo antonio':'indisponivel'
+};
+
+function buscarBairro(input) {
+  const n = norm(input);
+  if (!n) return undefined;
+  if (BAIRROS_TAXA[n] !== undefined) return { taxa: BAIRROS_TAXA[n], bairro: n };
+  let melhor = null, melhorScore = 0;
+  Object.entries(BAIRROS_TAXA).forEach(([k, v]) => {
+    const s = similaridade(n, k);
+    if (s > melhorScore) { melhorScore = s; melhor = { taxa: v, bairro: k }; }
+  });
+  if (melhorScore >= 0.6) return melhor;
+  return null;
+}
+
+const EMOJI_CAT = {'Hambúrgueres':'🍔','Lanches':'🥪','Porções':'🍟','Monte seu Burger':'🔨','Bebidas':'🥤'};
+
+const MENU = {
+  "Hambúrgueres": [
+    {name:"San Siro",price:43.90,desc:"Brioche, 180g, queijo, cebola empanada, bacon, geleia BBQ, sour cream"},
+    {name:"Maracanã",price:38.90,desc:"Brioche, 180g, queijo, maionese da casa, alface, tomate, bacon"},
+    {name:"Morumbi",price:37.90,desc:"Brioche, 180g, queijo, picles, cebola picada, mostarda, ketchup"},
+    {name:"Camp Nou",price:41.90,desc:"Brioche, 180g, queijo, cebola caramelizada, catupiry, bacon"},
+    {name:"Bernabeu",price:39.90,desc:"Brioche, 180g, queijo, alho frito, catupiry, bacon"},
+    {name:"Azteca",price:39.90,desc:"Brioche, 180g, duplo cheddar, bacon, maionese"},
+    {name:"Monumental",price:43.90,desc:"Brioche, 180g, queijo empanado, geleia de pimenta, tomate sweet grape, sour cream"},
+    {name:"El Madrigal",price:42.90,desc:"Brioche, 180g, abacaxi empanado, muçarela, mini vinagrete, maionese, sour cream"},
+  ],
+  "Lanches": [
+    {name:"Premier",price:43.90,desc:"Brioche, iscas de tilápia, molho tártaro, coleslaw"},
+    {name:"Romano",price:36.90,desc:"Ciabatta, salame, muçarela, alface, cebola roxa, tomate, sour cream"},
+    {name:"Centenário",price:48.90,desc:"Francês, picanha em tiras, muçarela, tomate, cebola, maionese de alho"},
+    {name:"Beira-Rio",price:49.90,desc:"Brioche, filé mignon, catupiry, maionese branca, tomate sweet grape"},
+    {name:"Pacaembu",price:37.90,desc:"Francês, hambúrguer de linguiça, muçarela, cebola, maionese de alho"},
+    {name:"Mineirão",price:39.90,desc:"Brioche, filé de frango empanado, maionese branca, alface"},
+    {name:"Noroeste",price:47.90,desc:"Francês, contra-filé, muçarela, alface, tomate, cebola, maionese da casa"},
+    {name:"São Carlense",price:54.90,desc:"Francês, filé mignon, muçarela, tomate, maionese da casa"},
+    {name:"Ferroviária",price:54.90,desc:"Francês, picanha ao alho frito, muçarela, tomate, maionese da casa"},
+  ],
+  "Porções": [
+    {name:"Tábua de Frios",price:54.90,desc:"Muçarela, parmesão, salame, coppa, picles, azeitona"},
+    {name:"Batata Flax Flu (inteira)",price:34.90,desc:"Batata palito com páprica picante"},
+    {name:"Batata Flax Flu (meia)",price:23.90,desc:"Batata palito com páprica picante"},
+    {name:"Batata Palestra (inteira)",price:39.90,desc:"Batata palito, cheddar e bacon"},
+    {name:"La Bombonera (inteira)",price:48.90,desc:"Batata, cheddar, bacon, ovos com gema mole"},
+    {name:"Olympic Rings (inteiro)",price:39.90,desc:"Anéis de cebola empanados artesanais"},
+    {name:"Libertadores (inteira)",price:45.90,desc:"Mandioca frita com pulled pork e sour cream"},
+    {name:"Oliver Kahn (inteira)",price:49.90,desc:"Iscas de frango panko com molho tártaro"},
+    {name:"Champions League (inteiro)",price:129.90,desc:"Costelinha defumada ao BBQ com fritas"},
+    {name:"Mundial (inteira)",price:99.90,desc:"Filé mignon com catupiry, batata frita"},
+    {name:"Brasileirão (inteira)",price:93.90,desc:"Picanhas na chapa, torradas, mandioca e molho"},
+    {name:"Sticks de Queijo",price:29.90,desc:"Palitinhos de muçarela empanados, geleia de pimenta"},
+    {name:"Dadinhos de Tapioca",price:29.90,desc:"Artesanais com goiabada e geleia de pimenta"},
+    {name:"Chips",price:15.90,desc:"Crocantes chips de batata doce"},
+    {name:"Amendoim",price:9.90,desc:"Consulte sabores disponíveis"},
+  ],
+  "Bebidas": [
+    {name:"Coca-Cola",price:7.00,desc:""},{name:"Guaraná Antarctica",price:7.00,desc:""},{name:"Fanta",price:7.00,desc:""},{name:"Sprite",price:7.00,desc:""},
+    {name:"Água sem gás",price:4.00,desc:""},{name:"Água com gás",price:5.00,desc:""},{name:"Energético Red Bull",price:13.00,desc:""},
+    {name:"H2OH",price:9.50,desc:"Consultar sabores"},{name:"Soda Italiana",price:16.90,desc:"Consultar sabores"},{name:"Suco",price:9.50,desc:"Consultar sabores"},{name:"Schweppes",price:7.50,desc:"Consultar sabores"},
+  ],
+};
+
+const MSB_BASE = 17.90;
+const MSB = {
+  pao: [{n:'Brioche',p:0},{n:'Francês',p:0},{n:'Australiano',p:0}],
+  queijo: [{n:'Prato',p:0},{n:'Muçarela',p:0},{n:'Cheddar',p:0}],
+  queijo_extra: [{n:'Queijo extra',p:4.90}],
+  molho: [{n:'Ketchup',p:0},{n:'Barbecue',p:0},{n:'Mostarda',p:0},{n:'Maionese branca',p:0},{n:'Maionese verde',p:0},{n:'Maionese de alho',p:0},{n:'Molho tártaro',p:0},{n:'Big',p:0},{n:'Geleia de pimenta',p:0},{n:'Geleia de barbecue',p:0},{n:'Sour cream',p:0}],
+  molho_extra: [{n:'Molho extra',p:4.90}],
+  carne: [{n:'Bovino 180g',p:14.90},{n:'Bovino smash 100g',p:10.90},{n:'Linguiça',p:10.90},{n:'Vegetariano',p:12.90}],
+  salada: [{n:'Alho frito',p:2.90},{n:'Alface',p:1.90},{n:'Tomate',p:2.90},{n:'Tomate sweet grape',p:3.90},{n:'Cebola',p:1.90},{n:'Cebola empanada',p:8.90},{n:'Cebola roxa',p:2.90},{n:'Cebola roxa caramelizada',p:5.90},{n:'Picles',p:5.90},{n:'Vinagrete',p:4.90}],
+  topping: [{n:'Bacon em cubos',p:7.90},{n:'Bacon fatiado',p:7.90},{n:'Catupiry',p:8.90},{n:'Cheddar cremoso',p:7.90},{n:'Ovo frito',p:4.90},{n:'Muçarela empanada',p:10.90}],
+};
+const MSB_SINGLE = ['pao','queijo','carne'];
+const MSB_LABELS = {pao:'Pão',queijo:'Queijo',queijo_extra:'Queijo extra',molho:'Molho(s)',molho_extra:'Molho extra',carne:'Carne',salada:'Salada(s)',topping:'Topping(s)'};
+
+// ─── MSB STATE ────────────────────────────────────────────────────────
+let msbSel = {};
+let msbBurgers = [];
+let msbQty = 1;
+
+function msbReset() {
+  msbSel = {pao:null,queijo:null,queijo_extra:[],molho:[],molho_extra:[],carne:null,salada:[],topping:[]};
+}
+msbReset();
+
+function msbToggle(cat, idx) {
+  if (MSB_SINGLE.includes(cat)) {
+    const anterior = msbSel[cat];
+    msbSel[cat] = anterior === idx ? null : idx;
+    if (anterior !== null && anterior !== undefined) {
+      const b = document.querySelector('[data-msb="' + cat + '-' + anterior + '"]');
+      if (b) b.classList.remove('active');
+    }
+    if (msbSel[cat] !== null) {
+      const b = document.querySelector('[data-msb="' + cat + '-' + idx + '"]');
+      if (b) b.classList.add('active');
+    }
+  } else {
+    const arr = msbSel[cat];
+    const pos = arr.indexOf(idx);
+    if (pos >= 0) arr.splice(pos, 1); else arr.push(idx);
+    const b = document.querySelector('[data-msb="' + cat + '-' + idx + '"]');
+    if (b) b.classList.toggle('active', arr.includes(idx));
+  }
+  const t = msbTotal();
+  const el = document.getElementById('msb-form-total');
+  if (el) el.textContent = 'R$ ' + t.toFixed(2).replace('.', ',');
+}
+
+function msbTotal() {
+  let t = MSB_BASE;
+  Object.entries(MSB).forEach(([cat, opts]) => {
+    const sel = msbSel[cat];
+    if (Array.isArray(sel)) sel.forEach(i => { t += opts[i].p; });
+    else if (sel !== null && sel !== undefined) t += opts[sel].p;
+  });
+  return t;
+}
+
+function msbShowError(msg) {
+  const el = document.getElementById('msb-form-error');
+  if (!el) return;
+  el.textContent = msg;
+  el.style.display = msg ? 'block' : 'none';
+}
+
+function msbChangeQty(delta) {
+  msbQty = Math.max(1, Math.min(10, msbQty + delta));
+  const el = document.getElementById('msb-qty-num');
+  if (el) el.textContent = msbQty;
+  const btn = document.getElementById('msb-form-add-btn');
+  if (btn) btn.textContent = msbQty > 1 ? 'Adicionar ' + msbQty + ' burgers' : 'Adicionar burger';
+}
+
+function msbAdicionarBurger() {
+  if (msbSel.pao === null) { msbShowError('Escolha o pão.'); return; }
+  if (msbSel.queijo === null) { msbShowError('Escolha o queijo.'); return; }
+  if (msbSel.carne === null) { msbShowError('Escolha a carne.'); return; }
+  if (msbSel.molho.length === 0) { msbShowError('Escolha ao menos um molho.'); return; }
+  msbShowError('');
+  const t = msbTotal();
+  const detalhes = [];
+  Object.entries(MSB).forEach(([cat, opts]) => {
+    const sel = msbSel[cat];
+    if (Array.isArray(sel) && sel.length > 0) detalhes.push(MSB_LABELS[cat] + ': ' + sel.map(i => opts[i].n).join(', '));
+    else if (!Array.isArray(sel) && sel !== null && sel !== undefined) detalhes.push(MSB_LABELS[cat] + ': ' + opts[sel].n);
+  });
+  const isVeg = MSB.carne[msbSel.carne].n === 'Vegetariano';
+  for (let q = 0; q < msbQty; q++) {
+    msbBurgers.push({ detalhes: detalhes.join(' · '), preco: t, qty: 1, combo: false, drink: '', isVeg });
+  }
+  msbQty = 1;
+  msbReset();
+  msbRenderPage(false);
+}
+
+function msbSetQty(idx, delta) {
+  msbBurgers[idx].qty = Math.max(1, msbBurgers[idx].qty + delta);
+  msbRenderBurgerList();
+}
+
+function msbRemover(idx) {
+  msbBurgers.splice(idx, 1);
+  if (msbBurgers.length === 0) msbRenderPage(true);
+  else msbRenderBurgerList();
+}
+
+function msbToggleCombo(idx) {
+  msbBurgers[idx].combo = !msbBurgers[idx].combo;
+  msbRenderBurgerList();
+}
+
+function msbAbrirForm() {
+  const fw = document.getElementById('msb-form-wrap');
+  const bm = document.getElementById('msb-btn-montar-mais');
+  if (fw) fw.style.display = 'block';
+  if (bm) bm.style.display = 'none';
+}
+
+function msbRenderBurgerList() {
+  const listEl = document.getElementById('msb-burgers-list');
+  if (!listEl) return;
+  const totalGeral = msbBurgers.reduce((s, b) => s + b.preco * b.qty + (b.combo ? COMBO_PRICE * b.qty : 0), 0);
+  listEl.innerHTML = msbBurgers.map((b, i) => '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">' +
+    '<span style="font-size:13px;font-weight:500">Burger ' + (i+1) + '</span>' +
+    '<button onclick="msbRemover(' + i + ')" style="background:none;border:none;cursor:pointer;color:var(--text-muted);font-size:16px;padding:0">✕</button></div>' +
+    '<div style="font-size:11px;color:var(--text-muted);line-height:1.5;margin-bottom:8px">' + b.detalhes + '</div>' +
+    '<div style="display:flex;align-items:center;justify-content:space-between">' +
+    '<div style="display:flex;align-items:center;gap:8px">' +
+    '<button onclick="msbSetQty(' + i + ',-1)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text)">−</button>' +
+    '<span style="font-size:14px;font-weight:500;min-width:16px;text-align:center">' + b.qty + '</span>' +
+    '<button onclick="msbSetQty(' + i + ',1)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text)">+</button></div>' +
+    '<span style="font-size:13px;font-weight:500;color:var(--amber)">R$ ' + (b.preco*b.qty+(b.combo?COMBO_PRICE*b.qty:0)).toFixed(2).replace('.',',') + '</span></div>' +
+    '<div onclick="msbToggleCombo(' + i + ')" style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer">' +
+    '<div style="width:16px;height:16px;border-radius:3px;border:1px solid var(--border);background:' + (b.combo?'var(--amber)':'var(--surface)') + ';flex-shrink:0;display:flex;align-items:center;justify-content:center">' +
+    (b.combo?'<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'') +
+    '</div><div style="font-size:11px;color:var(--text-muted)"><strong style="color:var(--amber)">+ Combo R$10,90</strong> Batata 100g + bebida</div></div>' +
+    '</div>').join('') +
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);margin-top:8px">' +
+    '<span style="font-size:12px;color:var(--text-muted)">Total burgers</span>' +
+    '<span style="font-size:16px;font-weight:600;color:var(--amber)">R$ ' + totalGeral.toFixed(2).replace('.',',') + '</span></div>' +
+    '<button onclick="msbAdicionarAoCarrinho()" style="width:100%;padding:11px;background:#1D9E75;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:10px">✓ Adicionar ao carrinho</button>';
+}
+
+function msbAdicionarAoCarrinho() {
+  msbBurgers.forEach(b => {
+    const key = 'msb_' + Date.now() + '_' + Math.random();
+    const instances = [];
+    for (let i = 0; i < b.qty; i++) {
+      instances.push({ combo: b.combo, drink: b.drink, ponto: b.isVeg ? 'N/A' : '', veg: b.isVeg, obs: '', bebidaAvulsa: '', bebidaAvulsaPreco: 0, detalhes: b.detalhes });
+    }
+    cart[key] = { name: 'Monte seu Burger', price: b.preco, instances, isMSB: true, detalhes: b.detalhes, isVeg: b.isVeg };
+  });
+  msbBurgers = [];
+  msbReset();
+  msbQty = 1;
+  updateCart();
+  msbRenderSuccess();
+}
+
+function msbRenderSuccess() {
+  document.getElementById('content-area').innerHTML =
+    '<div class="msb-card">' +
+    '<div class="msb-header"><div class="msb-title">🔨 Monte seu Burger</div></div>' +
+    '<div style="background:#0d2b1a;border:1px solid #1a5c30;border-radius:10px;padding:20px;text-align:center">' +
+    '<div style="font-size:22px;margin-bottom:8px">✅</div>' +
+    '<div style="color:#2ecc71;font-weight:600;font-size:15px;margin-bottom:6px">Burgers adicionados ao carrinho!</div>' +
+    '<div style="color:var(--text-muted);font-size:12px;margin-bottom:16px">Continue montando ou finalize seu pedido.</div>' +
+    '<div style="display:flex;gap:8px">' +
+    '<button onclick="msbMontarOutro()" style="flex:1;padding:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:8px;font-size:13px;cursor:pointer">Montar outro burger</button>' +
+    '<button onclick="abrirCheckout()" style="flex:1;padding:10px;background:var(--amber);color:#111;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:Bebas Neue,sans-serif;letter-spacing:1px">FINALIZAR COMPRA</button>' +
+    '</div></div></div>';
+}
+
+function msbMontarOutro() {
+  msbReset();
+  msbQty = 1;
+  msbRenderPage(true);
+}
+
+function msbRenderPage(formAberto) {
+  const formHtml =
+    '<div id="msb-form-wrap" style="' + (formAberto || msbBurgers.length === 0 ? '' : 'display:none') + '">' +
+    '<div id="msb-form-error" style="display:none;color:#e05a5a;font-size:12px;padding:8px;margin-bottom:10px;background:#2b0d0d;border-radius:8px;text-align:center"></div>' +
+    Object.entries(MSB).map(([cat, opts]) =>
+      '<div class="msb-section"><div class="msb-sec-title">' + MSB_LABELS[cat] + (MSB_SINGLE.includes(cat) ? '' : ' (múltipla)') + '</div><div class="msb-opts">' +
+      opts.map((o, i) => '<button class="msb-opt' + (cat==='queijo_extra'||cat==='molho_extra'?' extra-opt':'') +
+        ((Array.isArray(msbSel[cat]) ? msbSel[cat].includes(i) : msbSel[cat]===i) ? ' active' : '') +
+        '" data-msb="' + cat + '-' + i + '" onclick="msbToggle(\'' + cat + '\',' + i + ')">' +
+        o.n + (o.p > 0 ? '<span class="msb-opt-price">+R$' + o.p.toFixed(2).replace('.',',') + '</span>' : '') +
+        '</button>').join('') +
+      '</div></div>').join('') +
+    '<div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px;margin-bottom:8px">' +
+    '<span style="font-size:12px;color:var(--text-muted)">Este burger</span>' +
+    '<span id="msb-form-total" style="font-family:Bebas Neue,sans-serif;font-size:17px;color:var(--amber)">R$ ' + MSB_BASE.toFixed(2).replace('.',',') + '</span></div>' +
+    '<div style="display:flex;align-items:center;gap:10px;margin-top:4px">' +
+    '<button onclick="msbChangeQty(-1)" style="width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:18px;color:var(--amber);display:flex;align-items:center;justify-content:center">−</button>' +
+    '<span id="msb-qty-num" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:20px;text-align:center">1</span>' +
+    '<button onclick="msbChangeQty(1)" style="width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:18px;color:var(--amber);display:flex;align-items:center;justify-content:center">+</button>' +
+    '<button id="msb-form-add-btn" class="msb-add-btn" onclick="msbAdicionarBurger()" style="flex:1;margin-top:0">Adicionar burger</button>' +
+    '</div></div>' +
+    (msbBurgers.length > 0 && !formAberto ? '<button id="msb-btn-montar-mais" class="msb-add-btn" style="background:var(--surface2);color:var(--text);border:1px dashed var(--border);margin-top:8px" onclick="msbAbrirForm()">+ Montar outro burger</button>' : '');
+
+  document.getElementById('content-area').innerHTML =
+    '<div class="msb-card">' +
+    '<div class="msb-header"><div class="msb-title">🔨 Monte seu Burger</div><div class="msb-price">Base R$ ' + MSB_BASE.toFixed(2).replace('.',',') + '</div></div>' +
+    '<div id="msb-burgers-list"></div>' +
+    formHtml +
+    '</div>';
+
+  if (msbBurgers.length > 0) msbRenderBurgerList();
+}
+
+function renderMSBPage() { msbRenderPage(true); }
+
+// ─── GLOBAL STATE ────────────────────────────────────────────────────
+let activecat = Object.keys(MENU)[0];
+let cart = {};
+let cardVeg = {};  // key -> boolean
+let tipoEntrega = 'entrega';
+let pagamento = '';
+let taxaEntrega = 0;
+let bairroIndisponivel = false;
+
+// ─── ITEM MODAL STATE ────────────────────────────────────────────────
+let modalItem = null;   // { cat, catIdx, i, key }
+let modalPonto = '';
+let modalCombo = false;
+let modalDrink = '';
+let modalObs = '';
+
+// ─── HELPERS ─────────────────────────────────────────────────────────
+const MENU_CATS = Object.keys(MENU);
+function isCarneBovina(cat, name) {
+  if (cat==='Hambúrgueres') return CARNE_BOVINA_HAMBURGUERES.includes(name);
+  if (cat==='Lanches') return CARNE_BOVINA_LANCHES.includes(name);
+  return false;
+}
+function hasCombo(cat) { return COMBO_CATS.includes(cat); }
+
+// ─── CARD RENDERING ──────────────────────────────────────────────────
+function cardId(catIdx, i) { return 'icard-' + catIdx + '-' + i; }
+
+function cardHtml(cat, i) {
+  const catIdx = MENU_CATS.indexOf(cat);
+  const item = MENU[cat][i];
+  const key = cat + '|' + i;
+  const instances = (cart[key] && cart[key].instances) ? cart[key].instances : [];
+  const qty = instances.length;
+  const isVeg = cardVeg[key] || false;
+  const emoji = EMOJI_CAT[cat] || '🍽️';
+  const showVeg = cat === 'Hambúrgueres';
+  const id = cardId(catIdx, i);
+
+  const vegHtml = showVeg ?
+    '<label class="veg-toggle">' +
+    '<input type="checkbox" ' + (isVeg ? 'checked' : '') + ' onchange="setCardVeg(' + catIdx + ',' + i + ',this.checked)">' +
+    '<div class="veg-check"><svg width="8" height="8" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+    '<span class="veg-label">🌱 Vegetariano</span>' +
+    '</label>' : '';
+
+  return '<div class="item-card' + (qty > 0 ? ' active-card' : '') + '" id="' + id + '">' +
+    '<div class="emoji-placeholder">' + emoji + '</div>' +
+    '<div class="item-body">' +
+    '<div class="item-name">' + item.name + '</div>' +
+    (item.desc ? '<div class="item-desc">' + item.desc + '</div>' : '<div class="item-desc"></div>') +
+    vegHtml +
+    '<div class="item-footer">' +
+    '<div class="item-price">R$ ' + item.price.toFixed(2).replace('.',',') + '</div>' +
+    '<div class="qty-control">' +
+    (qty > 0 ? '<button class="qty-btn" onclick="removeUnit(' + catIdx + ',' + i + ')">−</button><span class="qty-num">' + qty + '</span>' : '') +
+    '<button class="qty-btn" onclick="openItemModal(' + catIdx + ',' + i + ')">+</button>' +
+    '</div></div>' +
+    '</div></div>';
+}
+
+function renderCats() {
+  const allCats = [...MENU_CATS, 'Monte seu Burger'];
+  document.getElementById('cats').innerHTML = allCats.map(c =>
+    '<button class="cat-btn' + (c === activecat ? ' active' : '') + '" onclick="selectCat(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</button>'
+  ).join('');
+}
+
+function selectCat(c) {
+  activecat = c;
+  renderCats();
+  if (c === 'Monte seu Burger') renderMSBPage(); else renderItems();
+}
+
+function renderItems() {
+  const items = MENU[activecat] || [];
+  document.getElementById('content-area').innerHTML =
+    '<div class="items" id="items">' +
+    items.map((item, i) => cardHtml(activecat, i)).join('') +
+    '</div>';
+}
+
+function updateCard(catIdx, i) {
+  const cat = MENU_CATS[catIdx];
+  const el = document.getElementById(cardId(catIdx, i));
+  if (!el) return;
+  el.outerHTML = cardHtml(cat, i);
+}
+
+// ─── ITEM MODAL ───────────────────────────────────────────────────────
+function openItemModal(catIdx, i) {
+  const cat = MENU_CATS[catIdx];
+  const key = cat + '|' + i;
+  const item = MENU[cat][i];
+  modalItem = { cat, catIdx, i, key };
+  modalPonto = '';
+  modalCombo = false;
+  modalDrink = '';
+  modalObs = '';
+
+  const isVeg = cardVeg[key] || false;
+  const carneBovina = isCarneBovina(cat, item.name) && !isVeg;
+  const showCombo = hasCombo(cat);
+
+  document.getElementById('item-modal-title').textContent = item.name;
+  document.getElementById('item-modal-sub').textContent = 'R$ ' + item.price.toFixed(2).replace('.',',');
+  document.getElementById('item-modal-error').classList.remove('show');
+
+  let html = '';
+
+  if (carneBovina) {
+    html += '<div class="modal-sec-title">Ponto da carne <span style="color:#e05a5a">*</span></div>' +
+      '<div class="ponto-mini-btns">' +
+      ['Mal passada','Ao ponto','Bem passada'].map(p =>
+        '<button class="ponto-mini-btn" id="mponto-' + p.replace(/ /g,'_') + '" onclick="setModalPonto(\'' + p + '\')">' + p + '</button>'
+      ).join('') +
+      '</div>';
+  }
+
+  if (showCombo) {
+    html += '<div class="modal-sec-title" style="margin-top:16px">Combo</div>' +
+      '<label class="combo-toggle">' +
+      '<input type="checkbox" id="modal-combo-chk" onchange="setModalCombo(this.checked)">' +
+      '<div class="combo-check-box"><svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
+      '<div class="combo-label"><strong>+ Combo R$10,90</strong><span>Batata 100g + bebida</span></div></label>' +
+      '<select class="combo-drink-select" id="modal-drink-sel" style="display:none" onchange="modalDrink=this.value">' +
+      '<option value="">Escolha a bebida...</option>' +
+      COMBO_DRINKS.map(d => '<option value="' + d + '">' + d + '</option>').join('') +
+      '</select>';
+  }
+
+  html += '<div class="modal-sec-title" style="margin-top:16px">Observações <span style="color:var(--text-muted);font-weight:400;font-size:10px">(opcional)</span></div>' +
+    '<textarea class="obs-input" rows="2" placeholder="Ex: sem cebola, sem picles..." oninput="modalObs=this.value"></textarea>';
+
+  document.getElementById('item-modal-content').innerHTML = html;
+  updateModalConfirmBtn();
+  document.getElementById('item-modal').classList.add('open');
+}
+
+function setModalPonto(p) {
+  modalPonto = p;
+  document.querySelectorAll('.ponto-mini-btn[id^="mponto-"]').forEach(btn => {
+    btn.classList.toggle('active', btn.id === 'mponto-' + p.replace(/ /g,'_'));
+  });
+  document.getElementById('item-modal-error').classList.remove('show');
+}
+
+function setModalCombo(checked) {
+  modalCombo = checked;
+  if (!checked) { modalDrink = ''; }
+  const sel = document.getElementById('modal-drink-sel');
+  if (sel) { sel.style.display = checked ? 'block' : 'none'; if (!checked) sel.value = ''; }
+  document.getElementById('item-modal-error').classList.remove('show');
+  updateModalConfirmBtn();
+}
+
+function updateModalConfirmBtn() {
+  if (!modalItem) return;
+  const item = MENU[modalItem.cat][modalItem.i];
+  const total = item.price + (modalCombo ? COMBO_PRICE : 0);
+  document.getElementById('item-modal-confirm-btn').textContent =
+    'Adicionar ao carrinho — R$ ' + total.toFixed(2).replace('.',',');
+}
+
+function confirmItemModal() {
+  const { cat, catIdx, i, key } = modalItem;
+  const item = MENU[cat][i];
+  const isVeg = cardVeg[key] || false;
+  const carneBovina = isCarneBovina(cat, item.name) && !isVeg;
+  const errEl = document.getElementById('item-modal-error');
+
+  if (carneBovina && !modalPonto) {
+    errEl.textContent = 'Escolha o ponto da carne.';
+    errEl.classList.add('show');
+    return;
+  }
+  if (modalCombo && !modalDrink) {
+    errEl.textContent = 'Escolha a bebida do combo.';
+    errEl.classList.add('show');
+    return;
+  }
+  errEl.classList.remove('show');
+
+  if (!cart[key]) cart[key] = { name: item.name, price: item.price, instances: [] };
+  cart[key].instances.push({
+    combo: modalCombo,
+    drink: modalDrink,
+    ponto: isVeg ? 'N/A' : modalPonto,
+    veg: isVeg,
+    obs: modalObs,
+    bebidaAvulsa: '',
+    bebidaAvulsaPreco: 0,
+  });
+
+  document.getElementById('item-modal').classList.remove('open');
+  updateCard(catIdx, i);
+  updateCart();
+}
+
+function fecharItemModal() {
+  document.getElementById('item-modal').classList.remove('open');
+}
+
+// ─── CART ACTIONS ─────────────────────────────────────────────────────
+function setCardVeg(catIdx, i, val) {
+  const cat = MENU_CATS[catIdx];
+  const key = cat + '|' + i;
+  cardVeg[key] = val;
+}
+
+function removeUnit(catIdx, i) {
+  const cat = MENU_CATS[catIdx];
+  const key = cat + '|' + i;
+  if (!cart[key] || cart[key].instances.length === 0) return;
+  cart[key].instances.pop();
+  if (cart[key].instances.length === 0) delete cart[key];
+  updateCard(catIdx, i);
+  updateCart();
+}
+
+function updateCart() {
+  let total = 0, count = 0;
+  Object.values(cart).forEach(entry => {
+    entry.instances.forEach(inst => {
+      total += entry.price + (inst.combo ? COMBO_PRICE : 0) + (inst.bebidaAvulsaPreco || 0);
+      count++;
+    });
+  });
+  document.getElementById('cart-info').textContent = count === 0 ? 'Nenhum item selecionado' : count + ' item' + (count > 1 ? 's' : '') + ' no pedido';
+  document.getElementById('cart-total').textContent = count === 0 ? '' : 'R$ ' + total.toFixed(2).replace('.',',');
+  document.getElementById('cart-btn').disabled = count === 0;
+}
+
+// ─── CHECKOUT ─────────────────────────────────────────────────────────
+function abrirCheckout() {
+  const entries = Object.values(cart).filter(e => e.instances.length > 0);
+  let resumoHtml = '';
+  let subtotal = 0;
+  entries.forEach(entry => {
+    const qty = entry.instances.length;
+    const st = entry.price * qty;
+    subtotal += st;
+    resumoHtml += '<div class="order-line">' + qty + 'x ' + entry.name + ' — R$ ' + st.toFixed(2).replace('.',',') + '</div>';
+    if (entry.isMSB) resumoHtml += '<div class="order-line sub">↳ ' + entry.detalhes + '</div>';
+    entry.instances.forEach((inst, idx) => {
+      if (inst.veg) resumoHtml += '<div class="order-line sub">↳ Un.' + (idx+1) + ': Vegetariano</div>';
+      if (inst.ponto && inst.ponto !== 'N/A') resumoHtml += '<div class="order-line sub">↳ Un.' + (idx+1) + ': ' + inst.ponto + '</div>';
+      if (inst.obs && inst.obs.trim()) resumoHtml += '<div class="order-line sub">↳ Un.' + (idx+1) + ': ' + inst.obs.trim() + '</div>';
+      if (inst.combo) {
+        subtotal += COMBO_PRICE;
+        resumoHtml += '<div class="order-line sub">↳ Un.' + (idx+1) + ': Combo (batata + ' + inst.drink + ') — R$ ' + COMBO_PRICE.toFixed(2).replace('.',',') + '</div>';
+      }
+    });
+  });
+  resumoHtml += '<div class="order-line" style="font-weight:600;color:var(--amber)">Subtotal: R$ ' + subtotal.toFixed(2).replace('.',',') + '</div>';
+  document.getElementById('resumo-itens').innerHTML = resumoHtml;
+  taxaEntrega = 0; bairroIndisponivel = false;
+  document.getElementById('taxa-info').innerHTML = '';
+  atualizarTotalFinal(subtotal);
+  pagamento = '';
+  document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('bloco-troco').style.display = 'none';
+  document.querySelectorAll('.error-msg').forEach(e => e.classList.remove('show'));
+  document.getElementById('resultado-pedido').innerHTML = '';
+  document.getElementById('btn-confirmar').disabled = false;
+  document.getElementById('btn-confirmar').textContent = 'ENVIAR PEDIDO';
+  setTipo('entrega');
+  document.getElementById('modal').classList.add('open');
+}
+
+function fecharCheckout() { document.getElementById('modal').classList.remove('open'); }
+
+function setTipo(t) {
+  tipoEntrega = t;
+  document.getElementById('btn-entrega').classList.toggle('active', t === 'entrega');
+  document.getElementById('btn-retirada').classList.toggle('active', t === 'retirada');
+  document.getElementById('bloco-entrega').style.display = t === 'entrega' ? 'block' : 'none';
+  if (t === 'retirada') { taxaEntrega = 0; bairroIndisponivel = false; document.getElementById('taxa-info').innerHTML = ''; }
+  atualizarTotalFinal(calcSubtotal());
+}
+
+function calcSubtotal() {
+  let s = 0;
+  Object.values(cart).filter(e => e.instances.length > 0).forEach(e => {
+    s += e.price * e.instances.length;
+    s += e.instances.filter(i => i.combo).length * COMBO_PRICE;
+    s += e.instances.reduce((acc, i) => acc + (i.bebidaAvulsaPreco || 0), 0);
+  });
+  return s;
+}
+
+function buscarTaxa() {
+  const input = document.getElementById('campo-bairro').value.trim();
+  const taxaInfo = document.getElementById('taxa-info');
+  const sub = calcSubtotal();
+  if (!input) { taxaInfo.innerHTML = ''; taxaEntrega = 0; bairroIndisponivel = false; atualizarTotalFinal(sub); return; }
+  const resultado = buscarBairro(input);
+  if (!resultado) {
+    taxaInfo.innerHTML = '<div class="taxa-badge" style="color:var(--text-muted)">Bairro não encontrado — taxa padrão R$ 10,00</div>';
+    taxaEntrega = 10; bairroIndisponivel = false;
+  } else if (resultado.taxa === 'indisponivel') {
+    taxaInfo.innerHTML = '<div class="taxa-badge" style="color:#e05a5a;border-color:#e05a5a">❌ Área não atendida</div>';
+    taxaEntrega = 0; bairroIndisponivel = true;
+  } else {
+    taxaInfo.innerHTML = '<div class="taxa-badge">🛵 Taxa de entrega: R$ ' + resultado.taxa.toFixed(2).replace('.',',') + '</div>';
+    taxaEntrega = resultado.taxa; bairroIndisponivel = false;
+  }
+  atualizarTotalFinal(sub);
+}
+
+function atualizarTotalFinal(subtotal) {
+  const total = subtotal + (tipoEntrega === 'entrega' ? taxaEntrega : 0);
+  let html = '';
+  if (tipoEntrega === 'entrega' && taxaEntrega > 0) html += '<div style="font-size:13px;color:var(--text-muted);margin-bottom:4px">Taxa de entrega: R$ ' + taxaEntrega.toFixed(2).replace('.',',') + '</div>';
+  html += '<div class="order-total">TOTAL: R$ ' + total.toFixed(2).replace('.',',') + '</div>';
+  document.getElementById('total-final').innerHTML = html;
+}
+
+function setPagamento(btn, tipo) {
+  pagamento = tipo;
+  document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('bloco-troco').style.display = tipo === 'Dinheiro' ? 'block' : 'none';
+  document.getElementById('err-pagamento').classList.remove('show');
+}
+
+async function enviarPedido() {
+  let valido = true;
+  const nome = document.getElementById('campo-nome').value.trim();
+  const tel = document.getElementById('campo-tel').value.trim().replace(/\D/g,'');
+
+  if (!nome) { document.getElementById('err-nome').classList.add('show'); valido = false; }
+  else document.getElementById('err-nome').classList.remove('show');
+
+  if (!tel || tel.length < 10) { document.getElementById('err-tel').classList.add('show'); valido = false; }
+  else document.getElementById('err-tel').classList.remove('show');
+
+  if (tipoEntrega === 'entrega') {
+    const rua = document.getElementById('campo-rua').value.trim();
+    const bairro = document.getElementById('campo-bairro').value.trim();
+    if (!rua) { document.getElementById('err-rua').classList.add('show'); valido = false; }
+    else document.getElementById('err-rua').classList.remove('show');
+    if (!bairro) { document.getElementById('err-bairro').classList.add('show'); valido = false; }
+    else document.getElementById('err-bairro').classList.remove('show');
+    if (bairroIndisponivel) {
+      document.getElementById('resultado-pedido').innerHTML =
+        '<div style="background:#2b0d0d;border:1px solid #5c1a1a;border-radius:10px;padding:14px;text-align:center;margin-top:12px"><p style="color:#e05a5a;font-size:13px">Infelizmente não atendemos essa região ainda.</p></div>';
+      return;
+    }
+  }
+
+  if (!pagamento) { document.getElementById('err-pagamento').classList.add('show'); valido = false; }
+  if (!valido) return;
+
+  const entries = Object.values(cart).filter(e => e.instances.length > 0);
+  const itens = [];
+  let subtotal = 0;
+
+  entries.forEach(entry => {
+    entry.instances.forEach(inst => {
+      const obs = [];
+      if (inst.veg) obs.push('Hambúrguer vegetariano');
+      if (inst.ponto && inst.ponto !== 'N/A') obs.push('Ponto: ' + inst.ponto);
+      if (entry.isMSB) obs.push(entry.detalhes);
+      if (inst.obs && inst.obs.trim()) obs.push(inst.obs.trim());
+      itens.push({ nome: entry.name, quantidade: 1, preco_unitario: entry.price, observacao: obs.join(' | ') || null });
+      subtotal += entry.price;
+      if (inst.combo) {
+        itens.push({ nome: 'Combo (Batata 100g + ' + inst.drink + ')', quantidade: 1, preco_unitario: COMBO_PRICE, observacao: null });
+        subtotal += COMBO_PRICE;
+      }
+    });
+  });
+
+  const total = subtotal + (tipoEntrega === 'entrega' ? taxaEntrega : 0);
+  const troco = pagamento === 'Dinheiro' ? document.getElementById('campo-troco').value.trim() : null;
+  const trocoNum = troco ? parseFloat(troco.replace(/[^\d,]/g,'').replace(',','.')) : null;
+
+  const payload = {
+    cliente: { nome: nome, telefone: '55' + tel.replace(/^55/,'') },
+    itens: itens,
+    tipo_entrega: tipoEntrega,
+    pagamento: pagamento,
+    troco_para: trocoNum,
+    endereco: tipoEntrega === 'entrega' ? document.getElementById('campo-rua').value.trim() : null,
+    bairro: tipoEntrega === 'entrega' ? document.getElementById('campo-bairro').value.trim() : null,
+    referencia: tipoEntrega === 'entrega' ? document.getElementById('campo-ref').value.trim() : null,
+    taxa_entrega: tipoEntrega === 'entrega' ? taxaEntrega : 0,
+    subtotal: subtotal,
+    total: total
+  };
+
+  const btn = document.getElementById('btn-confirmar');
+  btn.disabled = true;
+  btn.textContent = 'Enviando pedido...';
+
+  try {
+    const resp = await fetch(CRM_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': CRM_API_KEY },
+      body: JSON.stringify(payload)
+    });
+    if (resp.ok) {
+      const data = await resp.json();
+      document.getElementById('resultado-pedido').innerHTML =
+        '<div class="sucesso-box"><h3>✅ Pedido recebido!</h3>' +
+        '<p>Seu pedido <strong>#' + String(data.numero).padStart(4,'0') + '</strong> foi registrado com sucesso.<br>' +
+        'Você receberá a confirmação no WhatsApp em instantes!</p></div>';
+      btn.textContent = 'PEDIDO ENVIADO ✓';
+      cart = {};
+      updateCart();
+    } else {
+      throw new Error('API error ' + resp.status);
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.textContent = 'ENVIAR PEDIDO';
+    document.getElementById('resultado-pedido').innerHTML =
+      '<div style="background:#2b0d0d;border:1px solid #5c1a1a;border-radius:10px;padding:16px;text-align:center;margin-top:12px">' +
+      '<p style="color:#e05a5a;font-size:13px">Não foi possível enviar seu pedido. Tente novamente em alguns instantes.</p></div>';
+  }
+}
+
+renderCats();
+renderItems();
+</script>
+</body>
+</html>
