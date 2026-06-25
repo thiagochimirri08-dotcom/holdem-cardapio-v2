@@ -440,7 +440,7 @@ function msbAdicionarBurger() {
   }
   msbQty = 1;
   msbReset();
-  msbRenderPage(false);
+  msbAdicionarAoCarrinho();
 }
 
 function msbSetQty(idx, delta) {
@@ -547,7 +547,7 @@ function msbRenderPage(formAberto) {
     '<button onclick="msbChangeQty(-1)" style="width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:18px;color:var(--amber);display:flex;align-items:center;justify-content:center">−</button>' +
     '<span id="msb-qty-num" style="font-family:Bebas Neue,sans-serif;font-size:18px;color:var(--text);min-width:20px;text-align:center">1</span>' +
     '<button onclick="msbChangeQty(1)" style="width:32px;height:32px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;font-size:18px;color:var(--amber);display:flex;align-items:center;justify-content:center">+</button>' +
-    '<button id="msb-form-add-btn" class="msb-add-btn" onclick="msbAdicionarBurger()" style="flex:1;margin-top:0">Adicionar burger</button>' +
+    '<button id="msb-form-add-btn" class="msb-add-btn" onclick="msbAdicionarBurger()" style="flex:1;margin-top:0">Adicionar ao carrinho</button>' +
     '</div></div>' +
     (msbBurgers.length > 0 && !formAberto ? '<button id="msb-btn-montar-mais" class="msb-add-btn" style="background:var(--surface2);color:var(--text);border:1px dashed var(--border);margin-top:8px" onclick="msbAbrirForm()">+ Montar outro burger</button>' : '');
 
