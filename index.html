@@ -344,6 +344,7 @@ function buscarBairro(input) {
 }
 
 const EMOJI_CAT = {'Hambúrgueres':'🍔','Lanches':'🥪','Porções':'🍟','Monte seu Burger':'🔨','Bebidas':'🥤'};
+const CATEGORIA_ORDEM = ['Hambúrgueres', 'Lanches', 'Monte seu Burger', 'Porções', 'Bebidas'];
 
 
 const MSB_BASE = 17.90;
@@ -658,7 +659,8 @@ function cardHtml(cat, i) {
 }
 
 function renderCats() {
-  const allCats = [...MENU_CATS, 'Monte seu Burger'];
+  const catsDisponiveis = [...MENU_CATS, 'Monte seu Burger'];
+const allCats = CATEGORIA_ORDEM.filter(c => catsDisponiveis.includes(c));
   document.getElementById('cats').innerHTML = allCats.map(c =>
     '<button class="cat-btn' + (c === activecat ? ' active' : '') + '" onclick="selectCat(\'' + c.replace(/'/g, "\\'") + '\')">' + c + '</button>'
   ).join('');
@@ -1107,7 +1109,7 @@ async function enviarPedido() {
     '<div style="padding:40px 20px;text-align:center;color:var(--text-muted)">Carregando cardápio...</div>';
   try {
     await carregarCardapio();
-    activecat = MENU_CATS[0] || '';
+    activecat = CATEGORIA_ORDEM.find(c => MENU_CATS.includes(c)) || MENU_CATS[0] || '';
     renderCats();
     renderItems();
   } catch (e) {
