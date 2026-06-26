@@ -273,8 +273,32 @@ const CRM_API_KEY = 'holdem-cardapio-secret-key';
 const COMBO_PRICE = 10.90;
 const COMBO_CATS = ['Hambúrgueres','Lanches'];
 const COMBO_DRINKS = ['Coca-Cola','Fanta','Sprite','Guaraná Antarctica','Água sem gás','Água com gás','H2OH','Schweppes','Suco','Soda Italiana','Energético Red Bull'];
-const CARNE_BOVINA_HAMBURGUERES = ['San Siro','Maracanã','Morumbi','Camp Nou','Bernabeu','Azteca','Monumental','El Madrigal'];
-const CARNE_BOVINA_LANCHES = ['Centenário','Beira-Rio','Noroeste','São Carlense','Ferroviária'];
+
+const SUPABASE_URL = 'https://aexgdmolzyuwyhwhwmxc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFleGdkbW9senl1d3lod2h3bXhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE1OTUyOTgsImV4cCI6MjA5NzE3MTI5OH0.Co5c76wir0jextEa63LTbowlSZAbm2pfwpKv5iJlAng';
+
+let MENU = {};
+let MENU_CATS = [];
+
+async function carregarCardapio() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/produtos?ativo=eq.true&order=categoria,nome`, {
+      headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
+    });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const produtos = await res.json();
+    MENU = {};
+    produtos.forEach(p => {
+      if (!MENU[p.categoria]) MENU[p.categoria] = [];
+      MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo });
+    });
+    MENU_CATS = Object.keys(MENU);
+  } catch (e) {
+    document.getElementById('content-area').innerHTML =
+      '<div style="padding:40px 20px;text-align:center;color:var(--text-muted)">Não foi possível carregar o cardápio. Tente recarregar a página.</div>';
+    throw e;
+  }
+}
 
 function norm(s) { return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); }
 function similaridade(a, b) {
@@ -321,51 +345,6 @@ function buscarBairro(input) {
 
 const EMOJI_CAT = {'Hambúrgueres':'🍔','Lanches':'🥪','Porções':'🍟','Monte seu Burger':'🔨','Bebidas':'🥤'};
 
-const MENU = {
-  "Hambúrgueres": [
-    {name:"San Siro",price:43.90,desc:"Brioche, 180g, queijo, cebola empanada, bacon, geleia BBQ, sour cream"},
-    {name:"Maracanã",price:38.90,desc:"Brioche, 180g, queijo, maionese da casa, alface, tomate, bacon"},
-    {name:"Morumbi",price:37.90,desc:"Brioche, 180g, queijo, picles, cebola picada, mostarda, ketchup"},
-    {name:"Camp Nou",price:41.90,desc:"Brioche, 180g, queijo, cebola caramelizada, catupiry, bacon"},
-    {name:"Bernabeu",price:39.90,desc:"Brioche, 180g, queijo, alho frito, catupiry, bacon"},
-    {name:"Azteca",price:39.90,desc:"Brioche, 180g, duplo cheddar, bacon, maionese"},
-    {name:"Monumental",price:43.90,desc:"Brioche, 180g, queijo empanado, geleia de pimenta, tomate sweet grape, sour cream"},
-    {name:"El Madrigal",price:42.90,desc:"Brioche, 180g, abacaxi empanado, muçarela, mini vinagrete, maionese, sour cream"},
-  ],
-  "Lanches": [
-    {name:"Premier",price:43.90,desc:"Brioche, iscas de tilápia, molho tártaro, coleslaw"},
-    {name:"Romano",price:36.90,desc:"Ciabatta, salame, muçarela, alface, cebola roxa, tomate, sour cream"},
-    {name:"Centenário",price:48.90,desc:"Francês, picanha em tiras, muçarela, tomate, cebola, maionese de alho"},
-    {name:"Beira-Rio",price:49.90,desc:"Brioche, filé mignon, catupiry, maionese branca, tomate sweet grape"},
-    {name:"Pacaembu",price:37.90,desc:"Francês, hambúrguer de linguiça, muçarela, cebola, maionese de alho"},
-    {name:"Mineirão",price:39.90,desc:"Brioche, filé de frango empanado, maionese branca, alface"},
-    {name:"Noroeste",price:47.90,desc:"Francês, contra-filé, muçarela, alface, tomate, cebola, maionese da casa"},
-    {name:"São Carlense",price:54.90,desc:"Francês, filé mignon, muçarela, tomate, maionese da casa"},
-    {name:"Ferroviária",price:54.90,desc:"Francês, picanha ao alho frito, muçarela, tomate, maionese da casa"},
-  ],
-  "Porções": [
-    {name:"Tábua de Frios",price:54.90,desc:"Muçarela, parmesão, salame, coppa, picles, azeitona"},
-    {name:"Batata Flax Flu (inteira)",price:34.90,desc:"Batata palito com páprica picante"},
-    {name:"Batata Flax Flu (meia)",price:23.90,desc:"Batata palito com páprica picante"},
-    {name:"Batata Palestra (inteira)",price:39.90,desc:"Batata palito, cheddar e bacon"},
-    {name:"La Bombonera (inteira)",price:48.90,desc:"Batata, cheddar, bacon, ovos com gema mole"},
-    {name:"Olympic Rings (inteiro)",price:39.90,desc:"Anéis de cebola empanados artesanais"},
-    {name:"Libertadores (inteira)",price:45.90,desc:"Mandioca frita com pulled pork e sour cream"},
-    {name:"Oliver Kahn (inteira)",price:49.90,desc:"Iscas de frango panko com molho tártaro"},
-    {name:"Champions League (inteiro)",price:129.90,desc:"Costelinha defumada ao BBQ com fritas"},
-    {name:"Mundial (inteira)",price:99.90,desc:"Filé mignon com catupiry, batata frita"},
-    {name:"Brasileirão (inteira)",price:93.90,desc:"Picanhas na chapa, torradas, mandioca e molho"},
-    {name:"Sticks de Queijo",price:29.90,desc:"Palitinhos de muçarela empanados, geleia de pimenta"},
-    {name:"Dadinhos de Tapioca",price:29.90,desc:"Artesanais com goiabada e geleia de pimenta"},
-    {name:"Chips",price:15.90,desc:"Crocantes chips de batata doce"},
-    {name:"Amendoim",price:9.90,desc:"Consulte sabores disponíveis"},
-  ],
-  "Bebidas": [
-    {name:"Coca-Cola",price:7.00,desc:""},{name:"Guaraná Antarctica",price:7.00,desc:""},{name:"Fanta",price:7.00,desc:""},{name:"Sprite",price:7.00,desc:""},
-    {name:"Água sem gás",price:4.00,desc:""},{name:"Água com gás",price:5.00,desc:""},{name:"Energético Red Bull",price:13.00,desc:""},
-    {name:"H2OH",price:9.50,desc:"Consultar sabores"},{name:"Soda Italiana",price:16.90,desc:"Consultar sabores"},{name:"Suco",price:9.50,desc:"Consultar sabores"},{name:"Schweppes",price:7.50,desc:"Consultar sabores"},
-  ],
-};
 
 const MSB_BASE = 17.90;
 const MSB = {
@@ -608,7 +587,7 @@ function msbRenderPage(formAberto) {
 function renderMSBPage() { msbRenderPage(true); }
 
 // ─── GLOBAL STATE ────────────────────────────────────────────────────
-let activecat = Object.keys(MENU)[0];
+let activecat = '';
 let cart = {};
 let cardVeg = {};  // key -> boolean
 let tipoEntrega = 'entrega';
@@ -625,13 +604,14 @@ let modalDrink = '';
 let modalObs = '';
 
 // ─── HELPERS ─────────────────────────────────────────────────────────
-const MENU_CATS = Object.keys(MENU);
 function isCarneBovina(cat, name) {
-  if (cat==='Hambúrgueres') return CARNE_BOVINA_HAMBURGUERES.includes(name);
-  if (cat==='Lanches') return CARNE_BOVINA_LANCHES.includes(name);
-  return false;
+  const item = (MENU[cat] || []).find(i => i.name === name);
+  return item ? !!item.carneBovina : false;
 }
-function hasCombo(cat) { return COMBO_CATS.includes(cat); }
+function hasCombo(cat, name) {
+  const item = (MENU[cat] || []).find(i => i.name === name);
+  return item ? !!item.aceitaCombo : COMBO_CATS.includes(cat);
+}
 
 // ─── CARD RENDERING ──────────────────────────────────────────────────
 function cardId(catIdx, i) { return 'icard-' + catIdx + '-' + i; }
@@ -710,7 +690,7 @@ function openItemModal(catIdx, i) {
 
   const isVeg = cardVeg[key] || false;
   const carneBovina = isCarneBovina(cat, item.name) && !isVeg;
-  const showCombo = hasCombo(cat);
+  const showCombo = hasCombo(cat, item.name);
 
   document.getElementById('item-modal-title').textContent = item.name;
   document.getElementById('item-modal-sub').textContent = 'R$ ' + item.price.toFixed(2).replace('.',',');
@@ -1114,8 +1094,18 @@ async function enviarPedido() {
   }
 }
 
-renderCats();
-renderItems();
+(async () => {
+  document.getElementById('content-area').innerHTML =
+    '<div style="padding:40px 20px;text-align:center;color:var(--text-muted)">Carregando cardápio...</div>';
+  try {
+    await carregarCardapio();
+    activecat = MENU_CATS[0] || '';
+    renderCats();
+    renderItems();
+  } catch (e) {
+    // erro já exibido em carregarCardapio()
+  }
+})();
 </script>
 </body>
 </html>
