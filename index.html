@@ -526,11 +526,9 @@ function msbRenderBurgerList() {
     '<button onclick="msbSetQty(' + i + ',-1)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text)">−</button>' +
     '<span style="font-size:14px;font-weight:500;min-width:16px;text-align:center">' + b.qty + '</span>' +
     '<button onclick="msbSetQty(' + i + ',1)" style="width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--text)">+</button></div>' +
-    '<span style="font-size:13px;font-weight:500;color:var(--amber)">R$ ' + (b.preco*b.qty+(b.combo?COMBO_PRICE*b.qty:0)).toFixed(2).replace('.',',') + '</span></div>' +
-    '<div onclick="msbToggleCombo(' + i + ')" style="display:flex;align-items:center;gap:8px;margin-top:8px;cursor:pointer">' +
-    '<div style="width:16px;height:16px;border-radius:3px;border:1px solid var(--border);background:' + (b.combo?'var(--amber)':'var(--surface)') + ';flex-shrink:0;display:flex;align-items:center;justify-content:center">' +
-    (b.combo?'<svg width="9" height="9" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="#111" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>':'') +
-    '</div><div style="font-size:11px;color:var(--text-muted)"><strong style="color:var(--amber)">+ Combo R$10,90</strong> Batata 100g + bebida</div></div>' +
+   '<span style="font-size:13px;font-weight:500;color:var(--amber)">R$ ' + (b.preco*b.qty+(b.combo?COMBO_PRICE*b.qty:0)).toFixed(2).replace('.',',') + '</span></div>' +
+    (b.ponto && b.ponto !== 'N/A' ? '<div style="font-size:11px;color:var(--text-muted);margin-top:6px">🥩 Ponto: ' + b.ponto + '</div>' : '') +
+    (b.combo ? '<div style="font-size:11px;color:var(--text-muted);margin-top:4px">✓ <strong style="color:var(--amber)">Combo</strong> — batata + ' + (b.drink || 'bebida') + '</div>' : '') +
     '</div>').join('') +
     '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border);margin-top:8px">' +
     '<span style="font-size:12px;color:var(--text-muted)">Total burgers</span>' +
