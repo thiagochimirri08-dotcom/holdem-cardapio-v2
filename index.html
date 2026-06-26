@@ -290,7 +290,7 @@ async function carregarCardapio() {
     MENU = {};
     produtos.forEach(p => {
       if (!MENU[p.categoria]) MENU[p.categoria] = [];
-      MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo });
+      MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo, imagemUrl: p.imagem_url || null });
     });
     MENU_CATS = Object.keys(MENU);
   } catch (e) {
@@ -635,7 +635,7 @@ function cardHtml(cat, i) {
     '</label>' : '';
 
   return '<div class="item-card' + (qty > 0 ? ' active-card' : '') + '" id="' + id + '">' +
-    '<div class="emoji-placeholder">' + emoji + '</div>' +
+    (item.imagemUrl ? '<img src="' + item.imagemUrl + '" alt="" class="item-image" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0">' : '<div class="emoji-placeholder">' + emoji + '</div>') +
     '<div class="item-body">' +
     '<div class="item-name">' + item.name + '</div>' +
     (item.desc ? '<div class="item-desc">' + item.desc + '</div>' : '<div class="item-desc"></div>') +
