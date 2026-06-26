@@ -289,11 +289,10 @@ async function carregarCardapio() {
     const produtos = await res.json();
     MENU = {};
     produtos.forEach(p => {
-      if (!MENU[p.categoria]) MENU[p.categoria] = [];
-      MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo, imagemUrl: p.imagem_url || null });
-    });
-      MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo, imagemUrl: p.imagem_url || null, emPromocao: p.em_promocao || false, precoPromocional: p.preco_promocional ? Number(p.preco_promocional) : null });
-    MENU_CATS = Object.keys(MENU);
+  if (!MENU[p.categoria]) MENU[p.categoria] = [];
+  MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo, imagemUrl: p.imagem_url || null, emPromocao: p.em_promocao || false, precoPromocional: p.preco_promocional ? Number(p.preco_promocional) : null });
+});
+MENU_CATS = Object.keys(MENU);
   } catch (e) {
     document.getElementById('content-area').innerHTML =
       '<div style="padding:40px 20px;text-align:center;color:var(--text-muted)">Não foi possível carregar o cardápio. Tente recarregar a página.</div>';
