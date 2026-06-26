@@ -292,6 +292,7 @@ async function carregarCardapio() {
       if (!MENU[p.categoria]) MENU[p.categoria] = [];
       MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo, imagemUrl: p.imagem_url || null });
     });
+      MENU[p.categoria].push({ name: p.nome, price: Number(p.preco), desc: p.descricao || '', carneBovina: p.carne_bovina, aceitaCombo: p.aceita_combo, imagemUrl: p.imagem_url || null, emPromocao: p.em_promocao || false, precoPromocional: p.preco_promocional ? Number(p.preco_promocional) : null });
     MENU_CATS = Object.keys(MENU);
   } catch (e) {
     document.getElementById('content-area').innerHTML =
@@ -612,6 +613,9 @@ function hasCombo(cat, name) {
   const item = (MENU[cat] || []).find(i => i.name === name);
   return item ? !!item.aceitaCombo : COMBO_CATS.includes(cat);
 }
+ function precoEfetivo(item) {
+  return (item.emPromocao && item.precoPromocional) ? item.precoPromocional : item.price;
+}
 
 // ─── CARD RENDERING ──────────────────────────────────────────────────
 function cardId(catIdx, i) { return 'icard-' + catIdx + '-' + i; }
@@ -635,13 +639,18 @@ function cardHtml(cat, i) {
     '</label>' : '';
 
   return '<div class="item-card' + (qty > 0 ? ' active-card' : '') + '" id="' + id + '">' +
-    (item.imagemUrl ? '<img src="' + item.imagemUrl + '" alt="" class="item-image" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0">' : '<div class="emoji-placeholder">' + emoji + '</div>') +
+    '<div style="position:relative">' +
+(item.imagemUrl ? '<img src="' + item.imagemUrl + '" alt="" class="item-image" style="width:100%;height:120px;object-fit:cover;border-radius:8px 8px 0 0">' : '<div class="emoji-placeholder">' + emoji + '</div>') +
+(item.emPromocao ? '<div style="position:absolute;top:6px;left:6px;background:#E24B4A;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px">🔥 PROMOÇÃO</div>' : '') +
+'</div>' +
     '<div class="item-body">' +
     '<div class="item-name">' + item.name + '</div>' +
     (item.desc ? '<div class="item-desc">' + item.desc + '</div>' : '<div class="item-desc"></div>') +
     vegHtml +
     '<div class="item-footer">' +
-    '<div class="item-price">R$ ' + item.price.toFixed(2).replace('.',',') + '</div>' +
+    (item.emPromocao && item.precoPromocional ?
+  '<div class="item-price"><span style="text-decoration:line-through;color:var(--text-muted);font-size:12px;margin-right:6px">R$ ' + item.price.toFixed(2).replace('.',',') + '</span><span style="color:#E24B4A">R$ ' + item.precoPromocional.toFixed(2).replace('.',',') + '</span></div>' :
+  '<div class="item-price">R$ ' + item.price.toFixed(2).replace('.',',') + '</div>') +
     '<div class="qty-control">' +
     (qty > 0 ? '<button class="qty-btn" onclick="removeUnit(' + catIdx + ',' + i + ')">−</button><span class="qty-num">' + qty + '</span>' : '') +
     '<button class="qty-btn" onclick="openItemModal(' + catIdx + ',' + i + ')">+</button>' +
@@ -693,7 +702,7 @@ function openItemModal(catIdx, i) {
   const showCombo = hasCombo(cat, item.name);
 
   document.getElementById('item-modal-title').textContent = item.name;
-  document.getElementById('item-modal-sub').textContent = 'R$ ' + item.price.toFixed(2).replace('.',',');
+  document.getElementById('item-modal-sub').textContent = 'R$ ' + precoEfetivo(item).toFixed(2).replace('.',',');
   document.getElementById('item-modal-error').classList.remove('show');
 
   let html = '';
@@ -747,7 +756,7 @@ function setModalCombo(checked) {
 function updateModalConfirmBtn() {
   let preco = 0;
   if (modalMSBData) preco = modalMSBData.preco;
-  else if (modalItem) preco = MENU[modalItem.cat][modalItem.i].price;
+  else if (modalItem) preco = precoEfetivo(MENU[modalItem.cat][modalItem.i]);
   const total = preco + (modalCombo ? COMBO_PRICE : 0);
   document.getElementById('item-modal-confirm-btn').textContent =
     'Adicionar ao carrinho — R$ ' + total.toFixed(2).replace('.',',');
@@ -791,7 +800,7 @@ function confirmItemModal() {
   }
   errEl.classList.remove('show');
 
-  if (!cart[key]) cart[key] = { name: item.name, price: item.price, instances: [] };
+  if (!cart[key]) cart[key] = { name: item.name, price: precoEfetivo(item), instances: [] };
   cart[key].instances.push({
     combo: modalCombo,
     drink: modalDrink,
